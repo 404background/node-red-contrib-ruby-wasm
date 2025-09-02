@@ -1,0 +1,28 @@
+{
+  "name": "@background404/node-red-contrib-ruby-wasm",
+  "version": "0.0.1",
+  "description": "Node to execute Ruby with Node-RED",
+  "main": "node/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/404background/node-red-contrib-ruby-wasm.git"
+  },
+  "keywords": [
+    "node-red",
+    "ruby",
+    "WebAssembly"
+  ],
+  "author": "background404",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/404background/node-red-contrib-ruby-wasm/issues"
+  },
+  "homepage": "https://github.com/404background/node-red-contrib-ruby-wasm#readme",
+  "dependencies": {
+    "@ruby/3.4-wasm-wasi": "^2.7.1",
+    "@ruby/wasm-wasi": "^2.7.1"
+  }
+}
