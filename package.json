@@ -10,6 +10,11 @@
     "type": "git",
     "url": "git+https://github.com/404background/node-red-contrib-ruby-wasm.git"
   },
+  "node-red": {
+    "nodes": {
+      "ruby-wasm": "node/ruby-wasm/ruby-wasm.js"
+    }
+  },
   "keywords": [
     "node-red",
     "ruby",

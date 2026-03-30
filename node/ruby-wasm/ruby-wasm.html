@@ -1,11 +1,12 @@
 <!-- node/ruby-wasm/ruby-wasm.html -->
 <script type="text/javascript">
   RED.nodes.registerType("ruby-wasm", {
-    category: "function",
-    color: "#A61F17",
+    category: "ruby",
+    color: "#C70067",
     defaults: {
       name: { value: "" },
-      code: { value: 'puts "Hello, World!"' },
+  code: { value: 'puts "Hello from Ruby WASM!"\nputs "Current time: #{Time.now}"' },
+  continuous: { value: true }
     },
     inputs: 1,
     outputs: 1,
@@ -13,6 +14,34 @@
     label: function () {
       return this.name || "ruby-wasm";
     },
+    oneditprepare: function() {
+      var that = this;
+      this.editor = RED.editor.createEditor({
+        id: 'node-input-code-editor',
+        mode: 'ace/mode/ruby',
+        value: $("#node-input-code").val()
+      });
+    },
+    oneditsave: function() {
+      $("#node-input-code").val(this.editor.getValue());
+      this.editor.destroy();
+      delete this.editor;
+    },
+    oneditcancel: function() {
+      this.editor.destroy();
+      delete this.editor;
+    },
+    oneditresize: function(size) {
+      var rows = $("#dialog-form>div:not(.node-text-editor-row)");
+      var height = $("#dialog-form").height();
+      for (var i=0; i<rows.length; i++) {
+        height -= $(rows[i]).outerHeight(true);
+      }
+      var editorRow = $("#dialog-form>div.node-text-editor-row");
+      height -= (parseInt(editorRow.css("marginTop"))+parseInt(editorRow.css("marginBottom")));
+      $(".node-text-editor").css("height",height+"px");
+      this.editor.resize();
+    }
   });
 </script>
 
@@ -21,32 +50,92 @@
     <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
     <input type="text" id="node-input-name" placeholder="Name" />
   </div>
-  <div class="form-row" style="position: relative; min-height: 250px;">
-    <label for="node-input-code" style="width: 100%"><i class="fa fa-code"></i> Code</label>
+  <div class="form-row">
+  <label for="node-input-continuous"><i class="fa fa-bolt"></i> Continuous mode</label>
+  <input type="checkbox" id="node-input-continuous" />
+  <p class="form-tips">When enabled, output is streamed as it is produced. When disabled, output is sent once after execution completes.</p>
+  </div>
+  <div class="form-row node-text-editor-row">
+    <label for="node-input-code" style="width: 100%"><i class="fa fa-code"></i> Ruby Code</label>
     <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-code-editor" ></div>
     <input type="hidden" id="node-input-code" />
   </div>
 </script>
 
 <script type="text/html" data-help-name="ruby-wasm">
-  <p>A node that executes Ruby code using ruby-wasm.</p>
+  <p>A node that executes Ruby code using WebAssembly runtime.</p>
+  
   <h3>Inputs</h3>
   <dl class="message-properties">
-    <dt>payload<span class="property-type">string</span></dt>
-    <dd>The Ruby code to execute. If not provided, the code from the node's configuration will be used.</dd>
+    <dt>payload <span class="property-type">string</span></dt>
+    <dd>Ruby code to execute (optional). If provided, this overrides the configured code.</dd>
+    <dt>continuous <span class="property-type">boolean</span></dt>
+    <dd>When <code>true</code> (default), stream output as it is produced. When <code>false</code>, buffer output and send once after completion.</dd>
+    <dt>kill <span class="property-type">boolean</span></dt>
+    <dd>If set to <code>true</code>, terminates any running Ruby execution immediately.</dd>
   </dl>
+  
   <h3>Outputs</h3>
   <dl class="message-properties">
-    <dt>payload<span class="property-type">string</span></dt>
-    <dd>The result of the executed Ruby code.</dd>
+    <dt>payload <span class="property-type">string</span></dt>
+    <dd>The output from the Ruby code. Uses `puts`, `print`, or `<<` output first, then return value.</dd>
+    <dt>rubyStream <span class="property-type">string</span></dt>
+    <dd>When streaming, set to <code>"stdout"</code> or <code>"stderr"</code> on each incremental message.</dd>
+    <dt>rubyError <span class="property-type">string</span></dt>
+    <dd>Collected stderr content. Present on the final message and each streamed stderr message.</dd>
   </dl>
+  
   <h3>Details</h3>
-  <p>This node uses <code>@ruby/wasm-wasi</code> to run Ruby code within Node-RED. You can write your Ruby script directly in the editor.</p>
-  <p>Example:</p>
-  <pre><code>puts "Hello from Ruby!"
-3.times do |i|
-  puts "Line #{i + 1}"
-end
-"Done"
-</code></pre>
+  <p>This node executes Ruby code using WebAssembly runtime (<code>@ruby/wasm-wasi</code>). 
+  Write your Ruby script in the built-in code editor with syntax highlighting.</p>
+  
+  <p><strong>Output Priority:</strong></p>
+  <ol>
+    <li>Standard output (`puts`, `print`, `<<`) is captured and sent to msg.payload</li>
+    <li>If no standard output, the return value is used</li>
+    <li>If neither, original payload is preserved</li>
+  </ol>
+
+  <p><strong>Streaming:</strong> Every chunk written to stdout (and stderr) is emitted immediately as a separate message, making it possible to monitor long-running loops. The final message still carries the complete aggregated output.</p>
+  
+  <h3>Examples</h3>
+  <h4>Basic Output</h4>
+  <pre><code># Output using puts
+puts "Hello from Ruby!"
+
+# Multiple lines
+puts "Line 1"
+puts "Line 2"</code></pre>
+  
+  <h4>Return Value</h4>
+  <pre><code># Return value (no puts)
+result = 10 + 20
+"Calculation result: #{result}"</code></pre>
+  
+  <h4>String Processing</h4>
+  <pre><code># String manipulation
+text = "Hello World"
+processed = text.upcase.reverse
+puts "Processed: #{processed}"</code></pre>
+  
+  <h4>Array Operations</h4>
+  <pre><code># Array processing
+numbers = [1, 2, 3, 4, 5]
+sum = numbers.sum
+average = sum.to_f / numbers.length
+puts "Sum: #{sum}, Average: #{average}"</code></pre>
+  
+  <h3>Ruby Features Available</h3>
+  <ul>
+    <li>Core Ruby syntax and methods</li>
+    <li>String manipulation and regular expressions</li>
+    <li>Array and hash operations</li>
+    <li>Mathematical functions</li>
+    <li>Date and time operations</li>
+    <li>Control structures (loops, conditionals)</li>
+  </ul>
+  
+  <p><strong>Note:</strong> Some Ruby gems and advanced I/O operations may not be available in the WebAssembly environment.</p>
+
+  <p><strong>Continuous output:</strong> Enable streaming to see stdout/stderr chunks as they happen (<code>msg.continuous</code> or the checkbox). Turn it off to buffer output until the script finishes.</p>
 </script>

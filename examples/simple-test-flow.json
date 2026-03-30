@@ -1,0 +1,202 @@
+[
+  {
+    "id": "inject-simple",
+    "type": "inject",
+    "z": "simple-test",
+    "name": "1. Simple puts test",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "test",
+    "payloadType": "str",
+    "x": 110,
+    "y": 60,
+    "wires": [["ruby-simple"]]
+  },
+  {
+    "id": "ruby-simple",
+    "type": "ruby-wasm",
+    "z": "simple-test",
+    "name": "Simple Ruby",
+    "code": "puts \"Hello from Ruby!\"",
+    "x": 280,
+    "y": 60,
+    "wires": [["debug-simple"]]
+  },
+  {
+    "id": "debug-simple",
+    "type": "debug",
+    "z": "simple-test",
+    "name": "Simple Output",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 450,
+    "y": 60,
+    "wires": []
+  },
+  {
+    "id": "inject-calculation",
+    "type": "inject",
+    "z": "simple-test",
+    "name": "2. Calculation test",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "test",
+    "payloadType": "str",
+    "x": 110,
+    "y": 120,
+    "wires": [["ruby-calc"]]
+  },
+  {
+    "id": "ruby-calc",
+    "type": "ruby-wasm",
+    "z": "simple-test",
+    "name": "Ruby Calculator",
+    "code": "# Simple calculation\nnumbers = [1, 2, 3, 4, 5]\nsum = numbers.sum\naverage = sum.to_f / numbers.length\n\nputs \"Numbers: #{numbers}\"\nputs \"Sum: #{sum}\"\nputs \"Average: #{average}\"",
+    "x": 290,
+    "y": 120,
+    "wires": [["debug-calc"]]
+  },
+  {
+    "id": "debug-calc",
+    "type": "debug",
+    "z": "simple-test",
+    "name": "Calc Output",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 460,
+    "y": 120,
+    "wires": []
+  },
+  {
+    "id": "inject-return",
+    "type": "inject",
+    "z": "simple-test",
+    "name": "3. Return value test",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "test",
+    "payloadType": "str",
+    "x": 120,
+    "y": 180,
+    "wires": [["ruby-return"]]
+  },
+  {
+    "id": "ruby-return",
+    "type": "ruby-wasm",
+    "z": "simple-test",
+    "name": "Ruby Return",
+    "code": "# Return value (no puts)\ntime_now = Time.now\n\"Current time: #{time_now}\"",
+    "x": 290,
+    "y": 180,
+    "wires": [["debug-return"]]
+  },
+  {
+    "id": "debug-return",
+    "type": "debug",
+    "z": "simple-test",
+    "name": "Return Output",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 470,
+    "y": 180,
+    "wires": []
+  },
+  {
+    "id": "inject-string",
+    "type": "inject",
+    "z": "simple-test",
+    "name": "4. String processing",
+    "props": [
+      {
+        "p": "payload"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "Hello World",
+    "payloadType": "str",
+    "x": 120,
+    "y": 240,
+    "wires": [["ruby-string"]]
+  },
+  {
+    "id": "ruby-string",
+    "type": "ruby-wasm",
+    "z": "simple-test",
+    "name": "String Processing",
+    "code": "# String processing\ntext = \"Hello World\"\nprocessed = text.upcase.reverse\n\nputs \"Original: #{text}\"\nputs \"Processed: #{processed}\"",
+    "x": 310,
+    "y": 240,
+    "wires": [["debug-string"]]
+  },
+  {
+    "id": "debug-string",
+    "type": "debug",
+    "z": "simple-test",
+    "name": "String Output",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 480,
+    "y": 240,
+    "wires": []
+  },
+  {
+    "id": "simple-test",
+    "type": "tab",
+    "label": "Ruby WASM Simple Test",
+    "disabled": false,
+    "info": "# Ruby WASM Simple Test Flow\n\nThis flow demonstrates the basic functionality of the Ruby WASM node:\n\n1. **Simple puts test** - Basic output using puts statement\n2. **Calculation test** - Ruby array operations and calculations  \n3. **Return value test** - Using return values as output\n4. **String processing** - String manipulation\n\nAll output goes to msg.payload automatically.",
+    "env": []
+  }
+]

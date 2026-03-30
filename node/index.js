@@ -1,6 +1,5 @@
-// node/index.js
-import rubyWasm from "./ruby-wasm/ruby-wasm.js";
+const rubyWasm = require('./ruby-wasm/ruby-wasm');
 
-export default function (RED) {
-  rubyWasm(RED);
-}
+module.exports = function(RED) {
+    rubyWasm(RED);
+};

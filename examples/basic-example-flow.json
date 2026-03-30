@@ -1,0 +1,63 @@
+[
+  {
+    "id": "inject1",
+    "type": "inject",
+    "z": "basic-example",
+    "name": "Send Message",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "v": "test",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "test",
+    "payload": "Hello from Node-RED",
+    "payloadType": "str",
+    "x": 120,
+    "y": 100,
+    "wires": [["ruby1"]]
+  },
+  {
+    "id": "ruby1",
+    "type": "ruby-wasm",
+    "z": "basic-example",
+    "name": "Ruby Processor",
+    "code": "# Simple Ruby processing example\n\n# Output using puts\nputs \"Hello from Ruby!\"\nputs \"Current time: #{Time.now}\"\n\n# Simple calculation\nnumbers = [1, 2, 3, 4, 5]\nputs \"Sum of #{numbers}: #{numbers.sum}\"",
+    "x": 320,
+    "y": 100,
+    "wires": [["debug1"]]
+  },
+  {
+    "id": "debug1",
+    "type": "debug",
+    "z": "basic-example",
+    "name": "Output",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 510,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "basic-example",
+    "type": "tab",
+    "label": "Ruby WASM Basic Example",
+    "disabled": false,
+    "info": "",
+    "env": []
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "ruby-wasm": {
+    "name": "Ruby WASM",
+    "label": {
+      "name": "名前",
+      "code": "Rubyコード"
+    },
+    "help": {
+      "description": "WebAssemblyランタイムを使用してRubyコードを実行するノードです。",
+      "inputs": "入力",
+      "outputs": "出力",
+      "details": "詳細",
+      "examples": "例",
+      "inputPayload": "実行するRubyコード。指定されない場合は、ノードの設定からコードが使用されます。",
+      "outputPayload": "実行されたRubyコードの結果を文字列として出力します。",
+      "detailsText": "このノードは@ruby/wasm-wasiを使用して、WebAssemblyでNode-RED内でRubyコードを実行します。構文ハイライト付きの組み込みコードエディタでRubyスクリプトを直接記述できます。",
+      "sandboxInfo": "Rubyコードはサンドボックス化されたWebAssembly環境で実行されます。最後の式の結果または明示的なreturnが文字列に変換され、出力ペイロードとして設定されます。",
+      "basicOutput": "基本的な出力:",
+      "processingInput": "入力の処理:",
+      "calculations": "計算:"
+    },
+    "status": {
+      "ready": "準備完了",
+      "running": "実行中",
+      "streaming": "ストリーミング中",
+      "done": "完了",
+      "error": "エラー",
+      "init-failed": "初期化失敗"
+    },
+    "errors": {
+      "notString": "入力コードが文字列ではありません。"
+    }
+  }
+}
