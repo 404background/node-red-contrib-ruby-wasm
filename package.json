@@ -3,14 +3,18 @@
   "version": "0.0.1",
   "description": "Node to execute Ruby with Node-RED",
   "main": "node/index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "files": [
+    "node/",
+    "examples/*.json",
+    "README.md",
+    "LICENSE"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/404background/node-red-contrib-ruby-wasm.git"
   },
   "node-red": {
+    "version": ">=1.3.0",
     "nodes": {
       "ruby-wasm": "node/ruby-wasm/ruby-wasm.js"
     }
@@ -29,5 +33,8 @@
   "dependencies": {
     "@ruby/3.4-wasm-wasi": "^2.7.1",
     "@ruby/wasm-wasi": "^2.7.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

@@ -3,21 +3,25 @@ const path = require("path");
 const { Worker } = require("worker_threads");
 
 const DEFAULT_CONTINUOUS = true;
+const WORKER_PATH = path.join(__dirname, "ruby-worker.js");
 
-module.exports = function(RED) {
-    const workerPath = path.join(__dirname, "ruby-worker.js");
-    let rubyWorker = null;
+/**
+ * One Ruby VM in its own worker thread. Every ruby-wasm node owns one, so
+ * what a script defines (globals, methods, classes) stays within its node, and
+ * msg.kill stops only that node's run.
+ */
+function createRubyRunner() {
+    let worker = null;
     let nextRequestId = 1;
-    let activeNodeCount = 0;
     const pendingRequests = new Map();
 
-    function resetWorker(reason) {
-        if (!rubyWorker) {
+    function reset(reason) {
+        if (!worker) {
             return;
         }
 
-        const workerToTerminate = rubyWorker;
-        rubyWorker = null;
+        const workerToTerminate = worker;
+        worker = null;
 
         workerToTerminate.removeAllListeners();
         workerToTerminate.terminate().catch(() => {});
@@ -30,13 +34,13 @@ module.exports = function(RED) {
     }
 
     function ensureWorker() {
-        if (rubyWorker) {
-            return rubyWorker;
+        if (worker) {
+            return worker;
         }
 
-        rubyWorker = new Worker(workerPath);
+        worker = new Worker(WORKER_PATH);
 
-        rubyWorker.on("message", (message) => {
+        worker.on("message", (message) => {
             const { id } = message;
             const pending = pendingRequests.get(id);
             if (!pending) {
@@ -63,50 +67,52 @@ module.exports = function(RED) {
             }
         });
 
-        rubyWorker.on("error", (err) => {
-            resetWorker(`Ruby worker error: ${err.message}`);
+        worker.on("error", (err) => {
+            reset(`Ruby worker error: ${err.message}`);
         });
 
-        rubyWorker.on("exit", (code) => {
+        worker.on("exit", (code) => {
             const reason = code === 0 ? "Ruby worker exited" : `Ruby worker exited with code ${code}`;
-            resetWorker(reason);
+            reset(reason);
         });
 
-        return rubyWorker;
+        return worker;
     }
 
-    function runRuby(code, onStream) {
-        const worker = ensureWorker();
+    function run(code, onStream) {
+        const target = ensureWorker();
         const id = nextRequestId++;
 
         return new Promise((resolve, reject) => {
             pendingRequests.set(id, { resolve, reject, onStream });
 
             try {
-                worker.postMessage({ id, code });
+                target.postMessage({ id, code });
             } catch (error) {
                 pendingRequests.delete(id);
-                resetWorker(`Failed to post message to worker: ${error.message}`);
+                reset(`Failed to post message to worker: ${error.message}`);
                 reject(error);
             }
         });
     }
 
+    return { run, reset };
+}
+
+module.exports = function(RED) {
     function RubyWasmNode(config) {
         RED.nodes.createNode(this, config);
         const node = this;
-        activeNodeCount += 1;
+        const runner = createRubyRunner();
 
         node.on("input", async function(msg, send, done) {
             send = send || node.send.bind(node);
-            done = done || (() => {});
+            done = done || ((err) => { if (err) { node.error(err, msg); } });
 
             if (msg.kill) {
-                resetWorker("Killed by user");
+                runner.reset("Killed by user");
                 node.status({ fill: "red", shape: "ring", text: "killed" });
-                if (done) {
-                    done();
-                }
+                done();
                 return;
             }
 
@@ -171,7 +177,7 @@ module.exports = function(RED) {
                     ? Boolean(msg.continuous)
                     : (config.continuous !== undefined ? Boolean(config.continuous) : DEFAULT_CONTINUOUS);
 
-                const evaluation = await runRuby(codeToExecute, useContinuous ? (streamType, chunk) => {
+                const evaluation = await runner.run(codeToExecute, useContinuous ? (streamType, chunk) => {
                     if (streamType === "stdout" || streamType === "stderr") {
                         processStream(streamType, chunk, false);
                     }
@@ -212,29 +218,22 @@ module.exports = function(RED) {
 
                 node.status({ fill: "green", shape: "dot", text: statusText("ruby-wasm.status.done", "done") });
                 send(msg);
-                if (done) {
-                    done();
-                }
+                done();
             } catch (error) {
                 processStream("stdout", "", true);
                 processStream("stderr", "", true);
-                const baseMessage = `Ruby execution error: ${error.message}`;
-                node.error(baseMessage, msg);
                 if (error.analysis) {
                     node.warn(error.analysis);
                 }
                 node.status({ fill: "red", shape: "ring", text: statusText("ruby-wasm.status.error", "error") });
-                if (done) {
-                    done(error);
-                }
+                // done(err) alone reports it: calling node.error as well would
+                // trigger Catch nodes twice.
+                done(new Error(`Ruby execution error: ${error.message}`));
             }
         });
 
         node.on("close", function() {
-            activeNodeCount = Math.max(0, activeNodeCount - 1);
-            if (activeNodeCount === 0) {
-                resetWorker("All ruby-wasm nodes closed");
-            }
+            runner.reset("Node closed");
         });
     }
 

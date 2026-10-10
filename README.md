@@ -62,7 +62,13 @@ puts "Sum: #{sum}, Average: #{average}"
 ## Control
 
 - **Continuous mode**: `msg.continuous = true` (default) streams output as it is produced. Set to `false` to buffer and emit once after completion.
-- **Kill**: Send `msg.kill = true` to immediately terminate any running Ruby execution.
+- **Kill**: Send `msg.kill = true` to immediately terminate the Ruby execution running in this node. Other ruby-wasm nodes are not affected.
+
+## Isolation
+
+Each ruby-wasm node runs its own Ruby VM in a worker thread. Global variables, methods and classes a script defines stay within that node: they are kept for the node's next run, but other ruby-wasm nodes do not see them. Killing a node, or redeploying it, starts a fresh VM.
+
+Errors are reported once through the node's `done(err)`, so a Catch node receives each failure once.
 
 ## Streaming Output
 

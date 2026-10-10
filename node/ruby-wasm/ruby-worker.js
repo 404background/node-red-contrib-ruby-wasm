@@ -11,7 +11,13 @@ async function getRubyVM() {
     if (!vmPromise) {
         vmPromise = (async () => {
             const wasi = new WASI({ version: "preview1" });
-            const wasmPath = path.join(__dirname, "../../node_modules/@ruby/3.4-wasm-wasi/dist/ruby+stdlib.wasm");
+            // Resolved through the package, not relative to this file: npm
+            // hoists dependencies, so in ~/.node-red the package sits next to
+            // this one rather than in its own node_modules. Its exports do
+            // not list the .wasm file, so it is found from the main entry
+            // (dist/cjs/index.js).
+            const entry = require.resolve("@ruby/3.4-wasm-wasi");
+            const wasmPath = path.join(path.dirname(entry), "..", "ruby+stdlib.wasm");
             const rubyModule = await WebAssembly.compile(await fs.readFile(wasmPath));
             const { vm } = await RubyVM.instantiateModule({ module: rubyModule, wasip1: wasi });
             return vm;
