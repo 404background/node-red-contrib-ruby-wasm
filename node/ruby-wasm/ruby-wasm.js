@@ -5,6 +5,26 @@ const { Worker } = require("worker_threads");
 const DEFAULT_CONTINUOUS = true;
 const WORKER_PATH = path.join(__dirname, "ruby-worker.js");
 
+// Terminal animations start each frame by moving the cursor home (ESC[H,
+// ESC[1;1H) or clearing the screen (ESC[2J, ESC c). In frame mode each of
+// these starts a new message.
+const FRAME_START = /\x1b\[(?:[01]?(?:;[01]?)?H|2J)|\x1bc/;
+const ANSI_ESCAPE = /\x1b(?:\[[0-?]*[ -/]*[@-~]|[@-Z\\-_])/g;
+const CONTROL = /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g;
+
+/** The screen a terminal would show for one frame: escape sequences and
+ * control characters removed, and text after a carriage return written over
+ * the start of its line. */
+function renderFrame(text) {
+    return text.replace(ANSI_ESCAPE, "").replace(CONTROL, "").split("\n").map((line) => {
+        let screen = "";
+        for (const part of line.split("\r")) {
+            screen = part + screen.slice(part.length);
+        }
+        return screen;
+    }).join("\n");
+}
+
 /**
  * One Ruby VM in its own worker thread. Every ruby-wasm node owns one, so
  * what a script defines (globals, methods, classes) stays within its node, and
@@ -117,6 +137,10 @@ module.exports = function(RED) {
             }
 
             const streamBuffers = { stdout: "", stderr: "" };
+            let useFrames = false;
+            let frameCount = 0;
+            let screenReset = false;
+            let lastFrame = null;
 
             const statusText = (key, fallback) => {
                 const translated = typeof RED._ === "function" ? RED._(key) : null;
@@ -134,6 +158,21 @@ module.exports = function(RED) {
                 send(streamMsg);
             };
 
+            const emitFrame = (text) => {
+                const frame = renderFrame(text);
+                // ESC[2J ESC[H and the like leave empty pieces between them
+                if (!frame.trim()) {
+                    return;
+                }
+                node.status({ fill: "blue", shape: "dot", text: statusText("ruby-wasm.status.streaming", "streaming") });
+                const frameMsg = RED.util.cloneMessage(msg);
+                frameMsg.rubyStream = "stdout";
+                frameMsg.rubyFrame = ++frameCount;
+                frameMsg.payload = frame;
+                lastFrame = frame;
+                send(frameMsg);
+            };
+
             const processStream = (streamType, chunk, flush = false) => {
                 if (typeof chunk !== "string") {
                     chunk = chunk == null ? "" : String(chunk);
@@ -147,20 +186,35 @@ module.exports = function(RED) {
                     streamBuffers[streamType] += chunk;
                 }
 
+                const asFrames = useFrames && streamType === "stdout";
+
                 if (flush) {
                     const remainder = streamBuffers[streamType];
                     if (remainder.length) {
                         streamBuffers[streamType] = "";
-                        emitLine(streamType, remainder);
+                        if (asFrames) {
+                            emitFrame(remainder);
+                        } else {
+                            emitLine(streamType, remainder);
+                        }
                     }
                     return;
                 }
 
                 const buffer = streamBuffers[streamType];
-                const parts = buffer.split(/\r?\n/);
+                const parts = buffer.split(asFrames ? FRAME_START : /\r?\n/);
                 streamBuffers[streamType] = parts.pop() ?? "";
+                if (asFrames && parts.length && !screenReset) {
+                    // the first screen replaces what was written before it
+                    screenReset = true;
+                    parts.shift();
+                }
                 for (const part of parts) {
-                    emitLine(streamType, part);
+                    if (asFrames) {
+                        emitFrame(part);
+                    } else {
+                        emitLine(streamType, part);
+                    }
                 }
             };
 
@@ -176,6 +230,8 @@ module.exports = function(RED) {
                 const useContinuous = msg.continuous !== undefined
                     ? Boolean(msg.continuous)
                     : (config.continuous !== undefined ? Boolean(config.continuous) : DEFAULT_CONTINUOUS);
+                // frames are streamed, so frame mode needs continuous mode
+                useFrames = useContinuous && Boolean(msg.frames !== undefined ? msg.frames : config.frames);
 
                 const evaluation = await runner.run(codeToExecute, useContinuous ? (streamType, chunk) => {
                     if (streamType === "stdout" || streamType === "stderr") {
@@ -194,7 +250,10 @@ module.exports = function(RED) {
                     ? evaluation.result.toString()
                     : "";
 
-                if (stdoutOutput) {
+                if (lastFrame !== null) {
+                    // all frames joined together would not be readable
+                    msg.payload = lastFrame;
+                } else if (stdoutOutput) {
                     msg.payload = stdoutOutput;
                 } else if (resultOutput && resultOutput.trim()) {
                     msg.payload = resultOutput.trim();

@@ -6,6 +6,7 @@
   "files": [
     "node/",
     "examples/*.json",
+    "examples/trick2022-fishbowl/",
     "README.md",
     "LICENSE"
   ],

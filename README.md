@@ -13,6 +13,7 @@ npm install node-red-contrib-ruby-wasm
 - **Ruby WebAssembly Execution**: Execute Ruby code in a sandboxed WebAssembly environment
 - **Simple Output**: Ruby `puts`, `print`, and `<<` statements are captured to `msg.payload`
 - **Continuous Mode**: Stream output in real time (default) or buffer until completion when disabled
+- **Frame Mode**: Send terminal animations (ASCII art, quines) one screen at a time
 - **Rich Editor**: ACE editor with Ruby syntax highlighting
 - **No Dependencies**: Self-contained Ruby environment
 
@@ -81,7 +82,17 @@ The node supports real-time streaming of standard output. This is useful for lon
 - **Message Structure (when streaming)**: Streaming messages contain:
   - `msg.payload`: The chunk of text output
   - `msg.rubyStream`: `"stdout"` or `"stderr"`
-- **Final Message**: After execution completes, a final message is sent with the accumulated output (or return value).
+- **Final Message**: After execution completes, a final message is sent with the accumulated output (or return value). Only the last 1 MB of the output is kept for it, so endless output does not fill the memory.
+
+### Frame Mode
+
+ASCII art animations redraw the terminal: they move the cursor home (`\e[H`) or clear the screen (`\e[2J`) before each frame. With **Frame mode** on (and continuous mode on), stdout is split there instead of at each line:
+
+- Each frame is one message: `msg.payload` is the screen with escape sequences removed, `msg.rubyFrame` its number (from 1)
+- The final message carries the last frame
+- `msg.frames` overrides the setting
+
+The Debug sidebar shows the frames as pictures. An animation that never ends keeps running until `msg.kill`; put a Delay node in rate limit mode (drop intermediate messages) before the Debug node to keep the number of messages down.
 
 ### Streaming Example
 
@@ -115,7 +126,8 @@ $stdout << "Direct " << "write " << "to " << "stdout\n"
 
 - **Full Language Support**: Classes, modules, blocks, lambdas, and metaprogramming
 - **Standard Library**: String, Array, Hash, Math, Time, JSON, etc.
-- **Complex Logic**: Capable of running complex algorithms and obfuscated code (e.g., ASCII art animations)
+- **Complex Logic**: Capable of running complex algorithms and obfuscated code (e.g., ASCII art animations and quines)
+- **Bundled Gems**: The Ruby build includes the standard library and bundled gems such as `matrix`
 - **Sandboxed**: File system access is restricted to the WASM environment
 
 ## Examples
@@ -124,6 +136,7 @@ The `examples` folder contains test flows:
 
 - **`simple-test-flow.json`** - Basic functionality tests
 - **`basic-example-flow.json`** - Simple usage example
+- **`trick2022-fishbowl-flow.json`** - An ASCII art quine animation in frame mode: "Best fishbowl", the gold winner of TRICK 2022 by Tomoya Ishida (tompng). Click *start*, and *stop* to end it. The program is in [`examples/trick2022-fishbowl/`](examples/trick2022-fishbowl/) with its source and license
 
 Import these flows to see the node in action.
 
@@ -154,6 +167,8 @@ To contribute to this project:
 ## License
 
 MIT License - see LICENSE file for details.
+
+`examples/trick2022-fishbowl/entry.rb` (also embedded in `trick2022-fishbowl-flow.json`) is the TRICK 2022 entry by Tomoya Ishida (tompng), from https://github.com/tric/trick2022, used under the MIT License: see [examples/trick2022-fishbowl/LICENSE](examples/trick2022-fishbowl/LICENSE).
 
 ## Support
 

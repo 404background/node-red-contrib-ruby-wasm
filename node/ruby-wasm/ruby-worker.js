@@ -45,6 +45,10 @@ require 'js'
 
 module RubyWasm
     class StreamIO
+        # An endless animation would grow the buffer forever: only the last
+        # part is kept for the final message (streamed chunks are all sent).
+        BUFFER_LIMIT = 1024 * 1024
+
         attr_reader :buffer
 
         def initialize(method_name)
@@ -55,6 +59,9 @@ module RubyWasm
         def write(str)
             chunk = str.to_s
             @buffer << chunk
+            if @buffer.bytesize > 2 * BUFFER_LIMIT
+                @buffer = @buffer.byteslice(-BUFFER_LIMIT, BUFFER_LIMIT).scrub("")
+            end
             begin
                 JS.global.call(@method_name, chunk)
             rescue StandardError => e

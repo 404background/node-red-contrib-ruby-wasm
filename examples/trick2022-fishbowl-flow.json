@@ -1,0 +1,121 @@
+[
+    {
+        "id": "5f0c1a2b3c4d5e01",
+        "type": "tab",
+        "label": "TRICK 2022 fishbowl",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "5f0c1a2b3c4d5e02",
+        "type": "comment",
+        "z": "5f0c1a2b3c4d5e01",
+        "name": "TRICK 2022 \"Best fishbowl\" by Tomoya Ishida (tompng), MIT License",
+        "info": "TRICK 2022 \"Best fishbowl\" (Gold) by Tomoya Ishida (tompng)\n\nSource: https://github.com/tric/trick2022/tree/main/01-tompng\nThe Ruby code in the ruby-wasm node is the entry copied unchanged.\n\nAn aquatic quine: every frame of the ASCII art fish tank is itself a Ruby program that resumes the animation from that frame.\n\n1. Click \"start\". The ruby-wasm node runs in frame mode, so each frame is one message; the delay node passes at most 2 frames a second to the Debug sidebar (widen the sidebar to see the 80 columns).\n2. The animation does not end: click \"stop\" (msg.kill).\n\n----\nMIT License\n\nCopyright (c) 2022 Tomoya Ishida (tompng)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n",
+        "x": 310,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "5f0c1a2b3c4d5e03",
+        "type": "inject",
+        "z": "5f0c1a2b3c4d5e01",
+        "name": "start",
+        "props": [],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 110,
+        "y": 100,
+        "wires": [
+            [
+                "5f0c1a2b3c4d5e05"
+            ]
+        ]
+    },
+    {
+        "id": "5f0c1a2b3c4d5e04",
+        "type": "inject",
+        "z": "5f0c1a2b3c4d5e01",
+        "name": "stop",
+        "props": [
+            {
+                "p": "kill",
+                "v": "true",
+                "vt": "bool"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 110,
+        "y": 160,
+        "wires": [
+            [
+                "5f0c1a2b3c4d5e05"
+            ]
+        ]
+    },
+    {
+        "id": "5f0c1a2b3c4d5e05",
+        "type": "ruby-wasm",
+        "z": "5f0c1a2b3c4d5e01",
+        "name": "fishbowl",
+        "code": "                               eval((s=%~c=(0..35\n                         ).map{s[2*_1+1]}*'';class$Inte\n                     ger;def$quXinclude(Math ;spXo(a)=self*\n                 a.pow(87X=h=32.chr;g=PI/480;ls=(sp*31X,89)%89;\n               def$abX+'eval((s=%'+(n=? .next)+s*88.chr+[nXs()=[a\n            =self%X+'.split(',sp*25+'?'+88.chr+');(0..36).mapX89,89-\n          a].miX{s[2*_1].split}',sp*31+\".join.tr('$',$/)))\"]*$/)Xn;end\n         ;reqX.split$/;trap(:INT){puts;exit};q=->t,i{a,y=((t+i*99)Xuire\n       'matrX%960). ivmod(80);[(a*(7+i)+i*23)%79+(y+a)/(5+i%4)%2,39Xix';1\n      5.tiX-y/2]};p=->t,u{a=->b,c{(0..5).sum{(u%2-1)*E**(t*(b+c*_1)*gXmes{\n     |i,*X.i+ i*u+=5+sin(u*u))}};x,z=a[5,3].           5,3].rect;x+=y.Xv|z=\n    *?!Xi a[19,4];z+=w;r=(4+(x.abs+z.i).ab                };t=(0..959).fX..?\n   W,?Xind{|t|(0..29).all?{x,y=q[t,_1];(x                   2||h=ls[y][x]X[,*\n  ?]..X[/[^!-}]/]}};h=($**h+h).chr;eval(                     []}   ->(x,yX?};a\n  =(0X,a,b){x=x*36+39.5;y=19.5-y*18;b*=1                            |i|((yX..1\n 34)X-b).ceil..y+b).map{|j|((x-i)/a+(y j)/                          .times{X.ma\n p{zXx,z=p[t,_1];l=u```=0;while``````(l<1)``;          u+```=0      ;d=x-y;X.in\ndex(Xl+=(d.abs+(z-w``)``.i).ab``s*1.``1 ;x``,z=y``,w;o[v``=``x.r    d.imag/Xc[i+\n15*Xd.abs*l*sin(2*``l-t``*g*80``-_1)         l*(``1-l)/``6,a``=l*( -l)**2*0.X_1]\n)};X7,a*2]&&o[v,z,``0.0``3,l**``                ``times``{|i``|(8+i).times{|Xw=*\nMatXj|o[sin(i)/2+````` ```sin(                   `/2.0`````````)*j/200,j*0.0Xrix\n[*(X5-1,0.02,0.1]``}}   ``.                       q[t,``_1];m``[y][x]= };i=-X0..\n44).X1;$><<(['%%','[H                            .map{|j|(0..79).map{|k|x=(Xmap{\n |i,X -39.5)/35.8;y=(                            i+=1;m[j][k]?h:c[i]):ls[j]X*b|\n v<<X[k];}*''}*$/<<0)      1)%9                     te\"`\")#qv.jSaL{=;q(Q}4fXa.z\n  ip(Xjs(:#tK`Jm))FKO   /A9(2'%iorvf7 eEa0uV          xv+Q@qUU](L@&Py .1v'X0..\n  ).suXydSEH{-GI|-5(,z   G5evpq,[b50  D[   t          {on,I?VStS`?G@LoqFCXm{|j\n   ,k|Xj1.QnxKz!mH%o#    )b2Seut,]!   48              lBieJGi 5jeNPD#b}H3X-(p\n    =(iXaVz#8*+US,hgF     5#6]y-`    4hy               HN hF75WjD!0IxJ$sX+k)\n     .powX+UP\"cNUE9-  G<  tHvV;Ib    <-s           U  T ?  vlE xylg=x#X(i+k\n      ,88)XV9u$9lKb9  @C   do7+-w   >l {     v9   {   P l  ga%]AK<e&'X+1)*\n       (j||(X4ifK/6S+  k}   @@*a}  6rS      xn\"Q[M   8    `|g>$#BrjXb<<p;\n         0))}XtbDp'Kc   t2  Dat9C  s C  rL+ g,j]Tf  B<    eMI+zzkWX;b}]\n          .lup.XtVP<ak  IM  E/+)B  jwv  uB  (Twqed  D*   dyf_dT7Xsolve\n            (v);13Xn:8  #_  RiSTO,  [Fk  m  O]O#\"+  a_   cT_.X5.time\n               s{c[i+X  e5  T`FBEC  q*f  2 o@{a<eUG aW   PX15*_1]\n                 =z[a[_1]X z_@`nll  7F1  2 [=^uS0z^  6X||w.shif\n                     t]}};eval(Xfg  K#R  N bp-E_Xc)~.split(\n                         ?X);(0..36).map{s[2*_1].split}\n                               .join.tr('$',$/)))\n",
+        "continuous": true,
+        "frames": true,
+        "x": 290,
+        "y": 120,
+        "wires": [
+            [
+                "5f0c1a2b3c4d5e06"
+            ]
+        ]
+    },
+    {
+        "id": "5f0c1a2b3c4d5e06",
+        "type": "delay",
+        "z": "5f0c1a2b3c4d5e01",
+        "name": "2 frames/s",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "2",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": true,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 470,
+        "y": 120,
+        "wires": [
+            [
+                "5f0c1a2b3c4d5e07"
+            ]
+        ]
+    },
+    {
+        "id": "5f0c1a2b3c4d5e07",
+        "type": "debug",
+        "z": "5f0c1a2b3c4d5e01",
+        "name": "fish tank",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "rubyFrame",
+        "statusType": "msg",
+        "x": 650,
+        "y": 120,
+        "wires": []
+    }
+]

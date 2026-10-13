@@ -6,7 +6,8 @@
     defaults: {
       name: { value: "" },
   code: { value: 'puts "Hello from Ruby WASM!"\nputs "Current time: #{Time.now}"' },
-  continuous: { value: true }
+  continuous: { value: true },
+  frames: { value: false }
     },
     inputs: 1,
     outputs: 1,
@@ -55,6 +56,11 @@
   <input type="checkbox" id="node-input-continuous" />
   <p class="form-tips">When enabled, output is streamed as it is produced. When disabled, output is sent once after execution completes.</p>
   </div>
+  <div class="form-row">
+  <label for="node-input-frames"><i class="fa fa-film"></i> Frame mode</label>
+  <input type="checkbox" id="node-input-frames" />
+  <p class="form-tips">For terminal animations: with continuous mode, stdout is sent one screen at a time, split where the cursor moves home (<code>\e[H</code>) or the screen is cleared (<code>\e[2J</code>), with escape sequences removed.</p>
+  </div>
   <div class="form-row node-text-editor-row">
     <label for="node-input-code" style="width: 100%"><i class="fa fa-code"></i> Ruby Code</label>
     <div style="height: 250px; min-height:150px;" class="node-text-editor" id="node-input-code-editor" ></div>
@@ -71,6 +77,8 @@
     <dd>Ruby code to execute (optional). If provided, this overrides the configured code.</dd>
     <dt>continuous <span class="property-type">boolean</span></dt>
     <dd>When <code>true</code> (default), stream output as it is produced. When <code>false</code>, buffer output and send once after completion.</dd>
+    <dt>frames <span class="property-type">boolean</span></dt>
+    <dd>Overrides the node's frame mode.</dd>
     <dt>kill <span class="property-type">boolean</span></dt>
     <dd>If set to <code>true</code>, terminates any running Ruby execution immediately.</dd>
   </dl>
@@ -81,6 +89,8 @@
     <dd>The output from the Ruby code. Uses `puts`, `print`, or `<<` output first, then return value.</dd>
     <dt>rubyStream <span class="property-type">string</span></dt>
     <dd>When streaming, set to <code>"stdout"</code> or <code>"stderr"</code> on each incremental message.</dd>
+    <dt>rubyFrame <span class="property-type">number</span></dt>
+    <dd>In frame mode, the number of the frame (from 1) on each frame message.</dd>
     <dt>rubyError <span class="property-type">string</span></dt>
     <dd>Collected stderr content. Present on the final message and each streamed stderr message.</dd>
   </dl>
@@ -96,7 +106,9 @@
     <li>If neither, original payload is preserved</li>
   </ol>
 
-  <p><strong>Streaming:</strong> Every chunk written to stdout (and stderr) is emitted immediately as a separate message, making it possible to monitor long-running loops. The final message still carries the complete aggregated output.</p>
+  <p><strong>Streaming:</strong> Every chunk written to stdout (and stderr) is emitted immediately as a separate message, making it possible to monitor long-running loops. The final message still carries the complete aggregated output (the last 1 MB of it).</p>
+
+  <p><strong>Frame mode:</strong> ASCII art animations redraw the terminal screen. With frame mode each screen is one message, so the Debug sidebar shows the picture. Animations that never end run until <code>msg.kill</code>; a Delay node in rate limit mode keeps the number of messages down. The final message carries the last frame.</p>
   
   <h3>Examples</h3>
   <h4>Basic Output</h4>
