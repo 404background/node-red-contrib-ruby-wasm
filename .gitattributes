@@ -1,0 +1,2 @@
+# Keep Ruby sources (examples/trick2022-fishbowl/entry.rb is an unchanged copy) in LF
+*.rb text eol=lf
