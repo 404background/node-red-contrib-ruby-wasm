@@ -9,3 +9,5 @@
 It is an "aquatic quine": an 80 x 40 ASCII art fish tank animation in which every frame is itself a Ruby program that restores its missing characters and resumes the animation from that frame. See the author's [remarks](https://github.com/tric/trick2022/blob/main/01-tompng/remarks.markdown) for how it works.
 
 `../trick2022-fishbowl-flow.json` runs it in a ruby-wasm node with frame mode, so each frame of the animation is one message in the Debug sidebar. The animation does not end: stop it with the *stop* inject (`msg.kill`).
+
+`../trick2022-fishbowl-http-flow.json` shows it in a browser instead: open `/fishbowl` on Node-RED's HTTP port (1880 by default) and click *Start*.

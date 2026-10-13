@@ -137,6 +137,7 @@ The `examples` folder contains test flows:
 - **`simple-test-flow.json`** - Basic functionality tests
 - **`basic-example-flow.json`** - Simple usage example
 - **`trick2022-fishbowl-flow.json`** - An ASCII art quine animation in frame mode: "Best fishbowl", the gold winner of TRICK 2022 by Tomoya Ishida (tompng). Click *start*, and *stop* to end it. The program is in [`examples/trick2022-fishbowl/`](examples/trick2022-fishbowl/) with its source and license
+- **`trick2022-fishbowl-http-flow.json`** - The same animation in a browser, with HTTP In / HTTP Response nodes only: open `http://<Node-RED host>:1880/fishbowl` and click *Start*. The page fetches the latest frame (`GET /fishbowl/frame`) about 7 times a second and redraws it; *Start* / *Stop* call `POST /fishbowl/start` / `/fishbowl/stop`. The animation keeps running when the page is closed, until *Stop*
 
 Import these flows to see the node in action.
 
